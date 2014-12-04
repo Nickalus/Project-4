@@ -1,5 +1,7 @@
 #include "server.hpp"
 
+#include <iostream>
+
 Server::Server(unsigned int key, unsigned int port) 
 : mSecretKey(key), 
   mPort(port)
@@ -22,7 +24,7 @@ void Server::Init()
   mServer.sin_addr.s_addr = htonl(INADDR_ANY);
   
   //Set the server port number
-  mServer.sin_port = htons(port);
+  mServer.sin_port = htons(mPort);
   
   //Set all bits of the padding field to 0
   memset(mServer.sin_zero, '\0', sizeof(mServer.sin_zero)); 
@@ -98,7 +100,7 @@ void Server::ParsePacket()
     //Key did not match
 	status = -1;
   }
-  send(mNewSocket, msg.c_str(), msg.length(), 0);
+  //send(mNewSocket, msg.c_str(), msg.length(), 0);
 }
 
 int Server::Store()

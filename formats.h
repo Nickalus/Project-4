@@ -1,13 +1,13 @@
 const int MAX = 102400; //100kb
 
-typedef enum {STORE, RETRIEVE, DELETE, LIST};
+enum {STORE, RETRIEVE, DELETE, LIST};
 
-typedef struct myFile
+struct myFile
 {
   char fileBuffer[MAX]; //100kb buffer
 } mFile;
 
-typedef struct StoreRequest
+ struct StoreRequest
 {
   unsigned int secretKey; //Network byte order
   unsigned int type = STORE; //Network byte order
@@ -19,7 +19,7 @@ typedef struct StoreRequest
 
 unsigned int StoreResponse = 0;
 
-typedef struct RetrieveRequest
+struct RetrieveRequest
 { 
   unsigned int secretKey; //Network byte order
   unsigned int type; //Network byte order
@@ -27,14 +27,14 @@ typedef struct RetrieveRequest
   char fileName[81];
 };
 
-typedef struct RetrieveResponse
+struct RetrieveResponse
 {
   unsigned int status; //Network byte order
   unsigned int bytesInFile; //Network byte order
   char fileBuffer[MAX]; //100kb buffer
 };
 
-typedef struct DeleteRequest
+struct DeleteRequest
 {
   unsigned int secretKey; //Network byte order
   unsigned int type; //Network byte order

@@ -1,3 +1,6 @@
+#ifndef SERVER_HPP
+#define SERVER_HPP
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +11,8 @@
 #include <sys/socket.h>
 
 #include "formats.h"
+
+const unsigned int mBufSize = 3000;
 
 class Server
 {
@@ -33,9 +38,10 @@ class Server
 	
 	socklen_t mSocksize;
 	
-	const unsigned int mBufSize = 3000;
 	char mPacketBuffer[mBufSize];
 	
 	//Map holding file names, and buffer holding the file data
-	std::map<std::string, mFile> mFiles;
+	//std::map<std::string, mFile> mFiles;
 };
+
+#endif
