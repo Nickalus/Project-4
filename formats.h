@@ -1,11 +1,14 @@
+#ifndef FORMATS_H
+#define FORMATS_H
+
 const int MAX = 102400; //100kb
 
 enum {STORE, RETRIEVE, DELETE, LIST};
 
-struct myFile
+struct wootFile
 {
   char fileBuffer[MAX]; //100kb buffer
-} mFile;
+};
 
  struct StoreRequest
 {
@@ -16,8 +19,6 @@ struct myFile
   unsigned int bytesInFile; //Network byte order
   char fileBuffer[MAX]; //100kb buffer
 };
-
-unsigned int StoreResponse = 0;
 
 struct RetrieveRequest
 { 
@@ -42,4 +43,4 @@ struct DeleteRequest
   char fileName[81]; 
 };
 
-unsigned int DeleteResponse = 0;
+#endif

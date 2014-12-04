@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <map>
 
 #include "formats.h"
 
@@ -41,7 +42,7 @@ class Server
 	char mPacketBuffer[mBufSize];
 	
 	//Map holding file names, and buffer holding the file data
-	//std::map<std::string, mFile> mFiles;
+	std::map<std::string, wootFile> mWoot;
 };
 
 #endif

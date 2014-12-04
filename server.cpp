@@ -43,10 +43,6 @@ void Server::Run()
   
   while(mNewSocket)
   {
-    //We got a connection
-    std::string dest = inet_ntoa(dest.sin_addr);
-    std::cout << "Incoming connection from: " + dest << std::endl;
-	
 	//Get the packet
 	int length = recv(mNewSocket, mPacketBuffer, mBufSize, 0);
 	
@@ -67,15 +63,16 @@ void Server::ParsePacket()
 {
   int status;
   //Check the key
-  unsigned int key;
-  memcpy(key, array, 4);
-  if(key == mSecretKey)
+  char key[4];
+  memcpy(key, mPacketBuffer, 4);
+  if(atoi(key) == mSecretKey)
   {
     //Check what the type
-	unsigned int type;
-	memcpy(type, array+4, 4);
+	char type[4];
+	memcpy(type, mPacketBuffer+4, 4);
 	
-    switch(type) 
+    switch(atoi(type)) 
+    switch(atoi(type)) 
 	{
       case STORE:
         status = Store();
