@@ -46,6 +46,8 @@ void Server::Run()
 	//Get the packet
 	int length = recv(mNewSocket, mPacketBuffer, mBufSize, 0);
 	
+	std::cout << "We got something!!! " + length + "bytes." std::endl;	
+	
 	//NULL the data
 	mPacketBuffer[length] = '\0';
 	

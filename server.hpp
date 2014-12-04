@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <map>
+#include <cstdlib>
 
 #include "formats.h"
 
