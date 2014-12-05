@@ -67,14 +67,13 @@ void Server::ParsePacket()
   //Check the key
   char key[4];
   memcpy(key, mPacketBuffer, 4);
-  if(atoi(key) == mSecretKey)
+  if(ntohl(key) == mSecretKey)
   {
     //Check what the type
 	char type[4];
 	memcpy(type, mPacketBuffer+4, 4);
-	
-    switch(atoi(type)) 
-    switch(atoi(type)) 
+
+    switch(ntohl(type)) 
 	{
       case STORE:
         status = Store();
