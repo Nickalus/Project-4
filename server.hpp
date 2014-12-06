@@ -24,15 +24,15 @@ class Server
 	void Init();
 	void Run();
   private:
-    void ParsePacket();
+    bool CheckKey();
+	void Type();
 	
 	int Store();
 	int Recieve();
 	int Delete();
 	int List();
   private:
-    unsigned int mSecretKey;
-	unsigned int mPort;
+    unsigned int mSecretKey, mRecievedKey, mPort;
 	
 	int mSocket, mNewSocket;
 	
@@ -40,10 +40,10 @@ class Server
 	
 	socklen_t mSocksize;
 	
-	char mPacketBuffer[mBufSize];
+	char mPacketBuffer[mBufSize + 1];
 	
 	//Map holding file names, and buffer holding the file data
-	std::map<std::string, wootFile> mWoot;
+	std::map<std::string, FileBuffer> mWoot;
 };
 
 #endif

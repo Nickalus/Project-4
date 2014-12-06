@@ -43,16 +43,15 @@ void Server::Run()
   
   while(mNewSocket)
   {
-	//Get the packet
-	int length = recv(mNewSocket, mPacketBuffer, mBufSize, 0);
+	//Get the packet, only 4 bytes + 1 for the NULL
+	int length = recv(mNewSocket, mPacketBuffer, 5, 0);
 	
-	std::cout << "We got something!!! " + length + "bytes." std::endl;	
-	
-	//NULL the data
+	//NULL the last of the buffer
 	mPacketBuffer[length] = '\0';
-	
-	//Parse the packet/buffer
-	ParsePacket();
+    
+	//Check if the keys equal each other and send respons
+	unsigned int response = htonl(CheckKey());
+	send(mNewSocket, &response, 4, 0);
 	
 	//Close the socket
 	close(mNewSocket);
@@ -61,49 +60,50 @@ void Server::Run()
   }
 }
 
-void Server::ParsePacket()
+void Server::Type()
 {
-  int status;
-  //Check the key
-  char key[4];
-  memcpy(key, mPacketBuffer, 4);
-  if(ntohl(key) == mSecretKey)
-  {
-    //Check what the type
-	char type[4];
-	memcpy(type, mPacketBuffer+4, 4);
+  //Get the type packet, only 4 bytes + 1 for the NULL
+  recv(mNewSocket, mPacketBuffer, 5, 0);
+  
+  //NULL the last of the buffer
+  mPacketBuffer[length] = '\0';
+  
+  //Check what the type
+  int type;
+  memcpy(type, mPacketBuffer, 4);
 
-    switch(ntohl(type)) 
-	{
-      case STORE:
-        status = Store();
-      break;
-      case RETRIEVE:
-        status = Recieve();
-      break;
-      case DELETE:
-        status = Delete();
-      break;
-      case LIST:
-        status = List();
-      break;
-      default:
-		std::cout << "Unknown type of request!" << std::endl;
-		status = -1;
-      break;
-    }
-  }
-  else
+  switch(ntohl(type)) 
   {
-    //Key did not match
-	status = -1;
+    case STORE:
+      status = Store();
+    break;
+    case RETRIEVE:
+      status = Recieve();
+    break;
+    case DELETE:
+      status = Delete();
+    break;
+    case LIST:
+      status = List();
+    break;
+    default:
+      std::cout << "Unknown type of request!" << std::endl;
+      status = 0;
+    break;
   }
-  //send(mNewSocket, msg.c_str(), msg.length(), 0);
+}
+
+bool Server::CheckKey()
+{
+  //Get the key
+  memcpy(&mRecievedKey, mPacketBuffer, 4);
+  
+  return (ntohl(mRecievedKey) == mSecretKey);
 }
 
 int Server::Store()
 {
-  
+  std::cout << "Store!" << std::endl;
 }
 
 int Server::Recieve()
