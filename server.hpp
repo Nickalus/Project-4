@@ -3,16 +3,23 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <map>
+#include <vector>
 #include <cstdlib>
+#include <string>
 
 #include "formats.h"
+
+struct Files
+{
+  char name[81];
+  char fileBuffer[102401]; //100kb buffer
+};
 
 const unsigned int mBufSize = 3000;
 
@@ -43,7 +50,8 @@ class Server
 	char mPacketBuffer[mBufSize + 1];
 	
 	//Map holding file names, and buffer holding the file data
-	std::map<std::string, FileBuffer> mWoot;
+	Files mF;
+	std::vector<Files> mWoot;
 };
 
 #endif

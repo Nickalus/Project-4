@@ -1,19 +1,17 @@
 #ifndef FORMATS_H
 #define FORMATS_H
 
-const int MAX = 102400; //100kb
+const int MAX = 102401; //100kb
 
 enum {STORE, RETRIEVE, DELETE, LIST};
 
-struct wootFile
+struct FileBuffer
 {
   char fileBuffer[MAX]; //100kb buffer
 };
 
- struct StoreRequest
+struct StoreRequest
 {
-  unsigned int secretKey; //Network byte order
-  unsigned int type = STORE; //Network byte order
   //null terminated character string starting at the beginning of the buffer
   char fileName[81]; 
   unsigned int bytesInFile; //Network byte order
@@ -22,7 +20,6 @@ struct wootFile
 
 struct RetrieveRequest
 { 
-  unsigned int secretKey; //Network byte order
   unsigned int type; //Network byte order
   //null terminated character string starting at the beginning of the buffer
   char fileName[81];
@@ -37,10 +34,23 @@ struct RetrieveResponse
 
 struct DeleteRequest
 {
-  unsigned int secretKey; //Network byte order
   unsigned int type; //Network byte order
   //null terminated character string starting at the beginning of the buffer
   char fileName[81]; 
+};
+
+struct ListRequest
+{
+  unsigned int type; //Network byte order
+  //null terminated character string starting at the beginning of the buffer
+  char fileName[81]; 
+};
+
+struct ListResponse
+{
+  unsigned int status; //Network byte order
+  unsigned int bytesInFile; //Network byte order
+  char fileBuffer[MAX]; //100kb buffer
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "BaseClient.hpp"
 #include "formats.h"
 
-class StoreClient : public BaseClient
+class StoreClient : private BaseClient
 {
   public:
     StoreClient(std::string, unsigned int, unsigned int, std::string);
@@ -13,4 +13,9 @@ class StoreClient : public BaseClient
     int Send();
   private:
     StoreRequest mStore;
+	
+	std::string mFilename;
+	unsigned int mBytesInFile, mResponse;
+	char mStoreResponse[5];
+	char mFileBuffer[MAX];
 };

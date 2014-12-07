@@ -16,13 +16,9 @@ class BaseClient
 	
 	void Init();
   protected:
-    struct sockaddr_in mDest; //Protected so it can be accessed by derived classes
+    int mSocket; //Protected so it can be accessed by derived classes
   private:
-    unsigned int mSecretKey;
+    unsigned int mSecretKey, mPort;
 	
-	char mKeyResponse[5];
-	
-	int mSocket;
-	
-	unsigned int mPort;
+	struct sockaddr_in mDest; 
 };

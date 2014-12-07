@@ -1,10 +1,12 @@
 #include "StoreClient.hpp"
 #include <fstream> 
+#include <chrono>
+#include <thread>
 
 StoreClient::StoreClient(std::string name, unsigned int port, unsigned int key, 
-                         std::string fn) : BaseClient(name, port, key)
+                         std::string fn) : BaseClient(name, port, key), mFilename(fn)
 {
-  mStore.fileName = fn.c_str();
+  
 }
 
 void StoreClient::Init()
@@ -16,51 +18,37 @@ void StoreClient::Run()
 { 
   //Send type
   unsigned int type = htonl(STORE);
-  send(BaseClient::mSocket, &network_byte_order, 4, 0);
+  send(BaseClient::mSocket, &type, 4, 0);
+
+  ReadFile();
   
-  //ReadFile();
+  Send();
   
-  //if(!Send())
-  //{
-    //Error on sending...
-	//std::cout << "Error: Something went wrong!" << std::endl;
-  //}
+  recv(mSocket, mStoreResponse, 5, 0);
+  memcpy(&mResponse, mStoreResponse, 4);
   
-  //std::cout << "Closing socket" << std::endl;
-  //close(mSocket);
+  std::cout << mResponse << std::endl;
 }
 
 void StoreClient::ReadFile()
 {
-  std::ifstream is(mStore.fileName, std::ifstream::binary);
-  
+  std::ifstream is(mFilename.c_str(), std::ifstream::binary);
+
   if(is) 
   {
-    //get length of file:
-    is.seekg(0, is.end);
-    mStore.bytesInFile = is.tellg();
-    is.seekg(0, is.beg);
+    //get size of file:
+    is.seekg (0, is.end);
+    mBytesInFile = is.tellg();
+    is.seekg (0, is.beg);
+
+    char *buffer = new char[mBytesInFile];
 	
-	char *buffer = new char[mStore.bytesInFile];
-	
-	std::cout << "Reading file..." << std::endl;
-	
-	// read data as a block:
-    is.read(buffer, mStore.bytesInFile);
-	
-	if(is)
-	{
-      std::cout << "File read successfully." std::endl;
-	}
-    else
-	{
-      std::cout << "Error: Whole file could not be read" << std::endl;
-	}
-	
+    // read data as a block:
+    is.read(buffer, mBytesInFile);
+
     is.close();
 
-    //copy buffer to struct
-	memcpy(mStore.fileBuffer, buffer, mStore.bytesInFile + 1);
+	memcpy(mFileBuffer, buffer, mBytesInFile);
 
     delete[] buffer;
   }
@@ -68,21 +56,20 @@ void StoreClient::ReadFile()
 
 int StoreClient::Send()
 {
-  //Convert things to network byte order
-  mStore.secretKey = htonl(mSecretKey);
-  mStore.type = htonl(STORE);
-  mStore.bytesInFile = htonl(mStore.bytesInFile);
+  //Send fileName
+  send(BaseClient::mSocket, mFilename.c_str(), mFilename.size(), 0);
   
-  //Convert struct to byte array
-  char *cTemp;
-  cTemp = (char*)&mStore;
+  //Small delay
+  std::chrono::milliseconds dura( 500 );
+  std::this_thread::sleep_for( dura );
   
-  //Send
-  send(mSocket, cTemp, strlen(cTemp), 0);
+  //send bytesInFile
+  mBytesInFile = htonl(mBytesInFile);
+  send(BaseClient::mSocket, &mBytesInFile, sizeof(mBytesInFile), 0);
   
-  //Read response and return
-  char buffer[4 + 1]; //1 added for the NULL terminator
-  int len = recv(mSocket, buffer, 4, 0);
+  //Small delay
+  std::this_thread::sleep_for( dura );
   
-  return atoi(buffer);
+  //send fileBuffer
+  send(BaseClient::mSocket, mFileBuffer, MAX, 0);
 }

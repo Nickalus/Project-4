@@ -29,7 +29,6 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
   for (pp = hostp->h_addr_list; *pp != NULL; pp++) 
   {
     addr.s_addr = ((struct in_addr *)*pp)->s_addr;
-    //std::cout << "address: " << inet_ntoa(addr) << std::endl;
 	
 	//IP address of system
 	inet_pton(AF_INET, inet_ntoa(addr), &(mDest.sin_addr));
@@ -40,14 +39,14 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
 
 void BaseClient::Init()
 {
-  //std::cout << "Connecting..." << std::endl;
+  std::cout << "Connecting..." << std::endl;
   
   mDest.sin_family = AF_INET;
+  
   //Set the port number
   mDest.sin_port = htons(mPort);
   
-  int c = connect(mSocket, (struct sockaddr *)&mDest, sizeof(struct sockaddr));
-  if(c == -1)
+  if(connect(mSocket, (struct sockaddr *)&mDest, sizeof(struct sockaddr)) == -1)
   {
     //Error connecting
 	std::perror("connect");
@@ -55,29 +54,13 @@ void BaseClient::Init()
   }
   else
   {
-      //std::cout << "Connected!" << std::endl;
-	
-      uint32_t network_byte_order;
+    std::cout << "Connected!" << std::endl;
 
-      // convert and send
-      //std::cout << "Sending key: " << mSecretKey << std::endl;
-      network_byte_order = htonl(mSecretKey);
+    // convert and send
+    std::cout << "Sending key: " << mSecretKey << std::endl;
+    unsigned int network_byte_order = htonl(mSecretKey);
   
-      send(mSocket, &network_byte_order, 4, 0);
-
-      //Get the key
-	  recv(mSocket, mKeyResponse, 5, 0);
-	  uint32_t response;
-      memcpy(&response, mKeyResponse, 4);
-  
-      if(ntohl(response) == 0) //Key did not match
-      {
-        std::cout << "Key did not match! Exiting" << std::endl;
-        exit(1);
-      }
-	  else if(ntohl(response) == 1) //Key matched
-	  {
-	    //std::cout << "Key did match!" << std::endl;
-	  }
+    //Send the key
+    send(mSocket, &network_byte_order, 4, 0);
   }
 }

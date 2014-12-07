@@ -9,10 +9,9 @@ int main(int argc, char *argv[])
 	return -1;
   }
   
-  
-  BaseClient mcPut(std::string(argv[1]), atoi(argv[2]), atoi(argv[3]));
+  StoreClient mcPut(std::string(argv[1]), atoi(argv[2]), atoi(argv[3]), std::string(argv[4]));
   
   mcPut.Init();
   
-  //mcPut.Run();
+  mcPut.Run();
 }
