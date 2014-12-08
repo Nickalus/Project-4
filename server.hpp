@@ -19,6 +19,7 @@ struct Files
 {
   char name[81];
   char fileBuffer[102401]; //100kb buffer
+  unsigned int fileSize;
 };
 
 const unsigned int mBufSize = 3000;
@@ -40,6 +41,7 @@ class Server
 	int List();
   private:
     unsigned int mSecretKey, mRecievedKey, mPort;
+	unsigned int bytesInFile;
 	
 	int mSocket, mNewSocket;
 	

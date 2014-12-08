@@ -27,7 +27,7 @@ void StoreClient::Run()
   recv(mSocket, mStoreResponse, 5, 0);
   memcpy(&mResponse, mStoreResponse, 4);
   
-  std::cout << mResponse << std::endl;
+  //std::cout << mResponse << std::endl;
 }
 
 void StoreClient::ReadFile()
@@ -38,6 +38,7 @@ void StoreClient::ReadFile()
   {
     //get size of file:
     is.seekg (0, is.end);
+	mBytesInFile = 0;
     mBytesInFile = is.tellg();
     is.seekg (0, is.beg);
 
@@ -47,12 +48,12 @@ void StoreClient::ReadFile()
     is.read(buffer, mBytesInFile);
 
     is.close();
-
+	
 	memcpy(mFileBuffer, buffer, mBytesInFile);
-
+	
     delete[] buffer;
   }
-}
+} 
 
 int StoreClient::Send()
 {
@@ -64,8 +65,9 @@ int StoreClient::Send()
   std::this_thread::sleep_for( dura );
   
   //send bytesInFile
-  mBytesInFile = htonl(mBytesInFile);
-  send(BaseClient::mSocket, &mBytesInFile, sizeof(mBytesInFile), 0);
+  unsigned int bytesInFile = htonl(mBytesInFile);
+  send(BaseClient::mSocket, &bytesInFile, sizeof(bytesInFile), 0);
+  std::cout << "File size = " << mBytesInFile << std::endl;
   
   //Small delay
   std::this_thread::sleep_for( dura );

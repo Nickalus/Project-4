@@ -1,6 +1,12 @@
 #include "server.hpp"
 
 #include <iostream>
+#include <functional>
+#include <algorithm>
+#include <vector>
+#include <iterator>
+#include <chrono>
+#include <thread>
 
 Server::Server(unsigned int key, unsigned int port) 
 : mSecretKey(key), 
@@ -103,7 +109,7 @@ bool Server::CheckKey()
 }
 
 int Server::Store()
-{
+{ 
   std::cout << "Request Type = put" << std::endl;
   
   //Read filename
@@ -113,56 +119,185 @@ int Server::Store()
     perror("recv");
 	exit(1);
   }
-  char fiName[81];
+
   mPacketBuffer[81] = '\0';
   memcpy(&mF.name, mPacketBuffer, 81);
-  //mF.name = fiName;
   std::cout << "Filename = " << mF.name << std::endl;
  
   //Read bytes in file
   recv(mNewSocket, mPacketBuffer, 4, 0);
-  unsigned int bytesInFile = 0;
-  memcpy(&bytesInFile, mPacketBuffer, 4);
-  bytesInFile = ntohl(bytesInFile);
+  mF.fileSize = 0;
+  memcpy(&mF.fileSize, mPacketBuffer, 4);
+  mF.fileSize = ntohl(mF.fileSize);
   
   //read filebuffer
-  recv(mNewSocket, mPacketBuffer, MAX, 0);
-  memcpy(&mF.fileBuffer, mPacketBuffer, bytesInFile);
+  recv(mNewSocket, mF.fileBuffer, mF.fileSize, 0);
   
   if(CheckKey())
   {
-    mWoot.push_back(mF);
-  }
-  
-  //Find the file in the vector
-  for(auto i : mWoot)
-  {
-    if(strcmp(mF.name, i.name) == 0 && CheckKey())  //if lhs is equal to rhs.
-	{
-	  std::cout << "Operation Status = success" << std::endl;
-	  std::cout << "--------------------------" << std::endl;
-	  return 1; //succeeded 
+    if(mWoot.size() == 0) //Only if the vector is empty
+	{  
+	  mWoot.push_back(mF);
 	}
 	else
 	{
-	  std::cout << "Operation Status = error" << std::endl;
-	  std::cout << "--------------------------" << std::endl;
-	  return 0;
+      //Check if the file name already exists
+      for(int i = 0; i < mWoot.size(); i++)
+      {
+	    if(!strcmp(mWoot[i].name, mF.name)) //If it does
+	    {
+	      //Replace the file data
+		  strcpy(mWoot[i].fileBuffer, mF.fileBuffer);
+	    }
+	    else //If it doesn't
+	    {
+	      mWoot.push_back(mF);
+	    }
+      }
 	}
   }
+  
+  //Find the file in the vector
+  if(mWoot.size() != 0)
+  {
+    for(int i = 0; i < mWoot.size(); i++)
+    {
+      if(!strcmp(mWoot[i].name, mF.name) && CheckKey()) //if lhs is equal to rhs.
+	  {
+	    std::cout << mWoot[i].name << " " << mWoot[i].fileSize << " " << mWoot[i].fileBuffer << std::endl;
+        std::cout << "Operation Status = success" << std::endl;
+	    std::cout << "--------------------------" << std::endl;
+	    return 1; //succeeded 
+	  }
+    }
+  }
+  
+  //Wasn't found
+  std::cout << "Operation Status = error" << std::endl;
+  std::cout << "--------------------------" << std::endl;
+  return 0;
 }
 
 int Server::Recieve()
 {
   std::cout << "Request Type = get" << std::endl;
+  
+  //Read filename
+  int r = recv(mNewSocket, mPacketBuffer, 81, 0);
+  if(r == -1)
+  {
+    perror("recv");
+	exit(1);
+  }
+
+  mPacketBuffer[81] = '\0';
+  memcpy(&mF.name, mPacketBuffer, 81);
+  
+  //Search for filename
+  for(int i = 0; i < mWoot.size(); i++) 
+  {
+    if(!strcmp(mWoot[i].name, mF.name) && CheckKey()) //if lhs is equal to rhs.
+	{
+	  //Send found message (to keep from breaking code...)
+	  unsigned int one = htonl(1);
+	  send(mNewSocket, &one, sizeof(one), 0);
+	  
+	   //Small delay
+	  std::chrono::milliseconds dura(500);
+      std::this_thread::sleep_for(dura);
+	  
+      //send bytesInFile
+      unsigned int s = htonl(mWoot[i].fileSize);
+      send(mNewSocket, &s, sizeof(mWoot[i].fileSize), 0);
+	  
+      //Another delay
+      std::this_thread::sleep_for(dura);
+  
+      //send fileBuffer
+      send(mNewSocket, mWoot[i].fileBuffer, MAX, 0);
+	  
+      std::cout << "Operation Status = success" << std::endl;
+	  std::cout << "--------------------------" << std::endl;
+	  return 1; //succeeded 
+	}
+  }
+  
+  //Didn't find the file
+  std::cout << "Operation Status = error" << std::endl;
+  std::cout << "--------------------------" << std::endl;
+  return 0;
 }
 
 int Server::Delete()
 {
   std::cout << "Request Type = del" << std::endl;
+  //Get file name
+  int r = recv(mNewSocket, mPacketBuffer, 81, 0);
+  if(r == -1)
+  {
+    perror("recv");
+	exit(1);
+  }
+  
+  mPacketBuffer[81] = '\0';
+  std::cout << "Filename = " << mPacketBuffer << std::endl;
+  
+  //Loop till file name is found, delete that index
+  for(int i = 0; i < mWoot.size(); i++)
+  {
+    if(!strcmp(mWoot[i].name, mPacketBuffer) && CheckKey())
+	{
+	  mWoot.erase(mWoot.begin() + i);
+	  
+	  std::cout << "Operation Status = success" << std::endl;
+	  std::cout << "--------------------------" << std::endl;
+	  
+	  return 1;
+	}
+  }
+  
+  std::cout << "Operation Status = error" << std::endl;
+  std::cout << "--------------------------" << std::endl;
+  return 0;
 }
 
 int Server::List()
 {
   std::cout << "Request Type = list" << std::endl;
+  std::cout << "Filename = NONE" << std::endl;
+  
+  if(CheckKey())
+  {
+    std::string listString;
+    for(int i = 0; i < vecSize; i++)
+    {
+      //Convert the name to a string
+      listString = std::string(mWoot[i].name);
+	
+	  //Add a newline char to the end
+	  name += '\n'; 
+    }
+  
+    //send size of the string
+    unsigned int stringSize = listString.size();
+    send(mNewSocket, &stringSize, sizeof(stringSize), 0);
+  
+    //Small delay
+    std::chrono::milliseconds dura(500);
+    std::this_thread::sleep_for(dura);
+  
+    //Send the message/string
+    send(mNewSocket, &listString.c_str(), sizeof(listString), 0);
+	
+    std::cout << "Operation Status = success" << std::endl;
+    std::cout << "--------------------------" << std::endl;
+	  
+    return 1;
+  }
+  else
+  {
+    std::cout << "Operation Status = error" << std::endl;
+    std::cout << "--------------------------" << std::endl;
+    return 0;
+  }
 }
