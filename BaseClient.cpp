@@ -13,8 +13,7 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
   //Clear struct
   memset(&mDest, 0, sizeof(mDest)); 
   
-  //Code borrowed from notes
-  char **pp; /* or dotted decimal IP addr */
+char **pp; /* or dotted decimal IP addr */
   struct in_addr addr;
   struct hostent *hostp;
   if(inet_aton(name.c_str(), &addr) != 0)
@@ -29,6 +28,7 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
   for (pp = hostp->h_addr_list; *pp != NULL; pp++) 
   {
     addr.s_addr = ((struct in_addr *)*pp)->s_addr;
+    //std::cout << "address: " << inet_ntoa(addr) << std::endl;
 	
 	//IP address of system
 	inet_pton(AF_INET, inet_ntoa(addr), &(mDest.sin_addr));
@@ -39,9 +39,11 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
 
 void BaseClient::Init()
 {
-  std::cout << "Connecting..." << std::endl;
+  //std::cout << "Connecting..." << std::endl;
   
   mDest.sin_family = AF_INET;
+  
+  //mDest.sin_addr.s_addr = inet_addr(mAddy);
   
   //Set the port number
   mDest.sin_port = htons(mPort);
@@ -54,10 +56,9 @@ void BaseClient::Init()
   }
   else
   {
-    std::cout << "Connected!" << std::endl;
+    //std::cout << "Connected!" << std::endl;
 
     // convert and send
-    std::cout << "Sending key: " << mSecretKey << std::endl;
     unsigned int network_byte_order = htonl(mSecretKey);
   
     //Send the key

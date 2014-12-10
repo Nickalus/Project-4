@@ -34,6 +34,7 @@ class Server
   private:
     bool CheckKey();
 	void Type();
+	void GetFileName();
 	
 	int Store();
 	int Recieve();

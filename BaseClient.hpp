@@ -18,7 +18,8 @@ class BaseClient
   protected:
     int mSocket; //Protected so it can be accessed by derived classes
   private:
-    unsigned int mSecretKey, mPort;
+    unsigned int mPort, mSecretKey;
+	char mAddy[128];
 	
 	struct sockaddr_in mDest; 
 };

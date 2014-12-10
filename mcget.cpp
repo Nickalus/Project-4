@@ -9,9 +9,11 @@ int main(int argc, char *argv[])
 	return -1;
   }
   
-  GetClient mcget(std::string(argv[1]), atoi(argv[2]), atoi(argv[3]), 
+  GetClient mcget(std::string(argv[1]), 
+				  atoi(argv[2]), 
+				  atoi(argv[3]), 
                   std::string(argv[4]));
 				  
   mcget.Init();
-  mcget.Run();
+  return mcget.Run();
 }

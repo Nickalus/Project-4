@@ -14,7 +14,7 @@ void StoreClient::Init()
   BaseClient::Init();
 }
 
-void StoreClient::Run()
+int StoreClient::Run()
 { 
   //Send type
   unsigned int type = htonl(STORE);
@@ -27,7 +27,9 @@ void StoreClient::Run()
   recv(mSocket, mStoreResponse, 5, 0);
   memcpy(&mResponse, mStoreResponse, 4);
   
-  //std::cout << mResponse << std::endl;
+  //std::cout <<"Response = " << mResponse << std::endl;
+  
+  return mResponse;
 }
 
 void StoreClient::ReadFile()
@@ -55,7 +57,7 @@ void StoreClient::ReadFile()
   }
 } 
 
-int StoreClient::Send()
+void StoreClient::Send()
 {
   //Send fileName
   send(BaseClient::mSocket, mFilename.c_str(), mFilename.size(), 0);
@@ -67,7 +69,7 @@ int StoreClient::Send()
   //send bytesInFile
   unsigned int bytesInFile = htonl(mBytesInFile);
   send(BaseClient::mSocket, &bytesInFile, sizeof(bytesInFile), 0);
-  std::cout << "File size = " << mBytesInFile << std::endl;
+  //std::cout << "File size = " << mBytesInFile << std::endl;
   
   //Small delay
   std::this_thread::sleep_for( dura );

@@ -10,12 +10,12 @@ class GetClient : public BaseClient
     GetClient(std::string, unsigned int, unsigned int, std::string);
 	
 	void Init();
-	void Run();
+	int Run();
   private:
     void SendRequest();
     void WriteFile();
   private:
-	unsigned int mFileSize, mGetResponse;
+	unsigned int mFileSize, mResponse;
     std::string mFileName;
 	
 	char mPacketBuffer[3000];

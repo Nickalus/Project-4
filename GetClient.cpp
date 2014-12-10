@@ -11,13 +11,15 @@ void GetClient::Init()
   BaseClient::Init();
 }
 
-void GetClient::Run()
+int GetClient::Run()
 {
   //Send type
   unsigned int type = htonl(RETRIEVE);
   send(BaseClient::mSocket, &type, 4, 0);
   
   SendRequest();
+  
+  return mResponse;
 }
 
 void GetClient::SendRequest()
@@ -25,12 +27,12 @@ void GetClient::SendRequest()
   //Send fileName
   send(BaseClient::mSocket, mFileName.c_str(), mFileName.size(), 0);
   
-  //Recieve found file name
+  //Found file name
   recv(mSocket, mPacketBuffer, 5, 0);
-  memcpy(&mGetResponse, mPacketBuffer, 4);
-  mGetResponse = ntohl(mGetResponse); //Convert from network to host
+  memcpy(&mResponse, mPacketBuffer, 4);
+  mResponse = ntohl(mResponse); //Convert from network to host
   
-  if(mGetResponse)
+  if(mResponse == 0)
   {
     //Read bytes in file
     recv(BaseClient::mSocket, mPacketBuffer, 5, 0);
@@ -38,24 +40,24 @@ void GetClient::SendRequest()
     memcpy(&mFileSize, mPacketBuffer, 4);
     mFileSize = ntohl(mFileSize);
   
-    std::cout << "File size = " << mFileSize << std::endl;
+    //std::cout << "File size = " << mFileSize << std::endl;
   
     //read filebuffer
     recv(BaseClient::mSocket, mFileBuffer, mFileSize, 0);
-	
+	 
 	WriteFile();
 	
 	//Get the suceeded or failed message
 	recv(BaseClient::mSocket, mPacketBuffer, 5, 0);
-    memcpy(&mGetResponse, mPacketBuffer, 4);
-    mGetResponse = ntohl(mGetResponse); //Convert from network to host
+    memcpy(&mResponse, mPacketBuffer, 4);
+    mResponse = ntohl(mResponse); //Convert from network to host
   }
   else
   {
     //Get the suceeded or failed message
 	recv(BaseClient::mSocket, mPacketBuffer, 5, 0);
-    memcpy(&mGetResponse, mPacketBuffer, 4);
-    mGetResponse = ntohl(mGetResponse); //Convert from network to host
+    memcpy(&mResponse, mPacketBuffer, 4);
+    mResponse = ntohl(mResponse); //Convert from network to host
   }
 }
 
@@ -65,7 +67,7 @@ void GetClient::WriteFile()
   std::ofstream outfile(mFileName.c_str(), std::ofstream::binary);
   
   //write to outfile
-  std::cout << mFileBuffer << std::endl;
+  //std::cout << mFileBuffer << std::endl;
   outfile.write(mFileBuffer, mFileSize);
   
   //Close the file

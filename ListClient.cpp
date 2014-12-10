@@ -1,9 +1,10 @@
 #include "ListClient.hpp"
 #include <fstream>
-#include <vector>
+#include <chrono>
+#include <thread>
 
-ListClient::ListClient(std::string machName, unsigned int port, unsigned int key, 
-					 std::string f) : BaseClient(machName, port, key), std::vector<string> mFileNames(f) 
+ListClient::ListClient(std::string machName, unsigned int port, 
+					   unsigned int key) : BaseClient(machName, port, key)
 {
 }
 
@@ -12,31 +13,41 @@ void ListClient::Init()
   BaseClient::Init();
 }
 
-void ListClient::Run()
+int ListClient::Run()
 {
   //Send type
-  unsigned int type = htonl(RETRIEVE);
+  unsigned int type = htonl(LIST);
   send(BaseClient::mSocket, &type, 4, 0);
   
-  SendRequest();
+  ReadFiles();
+  
+  return mResponse;
 }
 
-void ListClient::SendRequest()
-{
-  // Would a request need to be sent? Various solutions didn't work and
-  // make me believe it isn't necessary but I realize it sounds stupid
-
-}
-
-void ListClient::ListFiles()
-{
-  //Our output file
-  std::ofstream outfile(mFileName.c_str(), std::ofstream::binary);
+void ListClient::ReadFiles()
+{ 
+    //Read bytes in file
+	mBuffer = new char[5];
+    recv(BaseClient::mSocket, mBuffer, 5, 0);
+	mMessageSize = 0;
+    memcpy(&mMessageSize, mBuffer, 4);
+    mMessageSize = ntohl(mMessageSize);
+	delete mBuffer;
   
-  //write to outfile
-  std::cout << mFileBuffer << std::endl;
-  outfile.write(mFileBuffer, mFileSize);
+    //std::cout << "File size = " << mFileSize << std::endl;
   
-  //Close the file
-  outfile.close();
+    //read filebuffer
+	mBuffer = new char[mMessageSize];
+    recv(BaseClient::mSocket, mBuffer, mMessageSize, 0);
+	
+	std::cout << "Files: " << std::endl;
+	std::cout << mBuffer << std::endl;
+	delete mBuffer;
+	
+	//Get the suceeded or failed message
+	mBuffer = new char[5];
+	recv(BaseClient::mSocket, mBuffer, 5, 0);
+    memcpy(&mResponse, mBuffer, 4);
+    mResponse = ntohl(mResponse); //Convert from network to host
+	delete mBuffer;
 }

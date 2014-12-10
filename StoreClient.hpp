@@ -7,15 +7,15 @@ class StoreClient : private BaseClient
     StoreClient(std::string, unsigned int, unsigned int, std::string);
 	
 	void Init();
-	void Run();
+	int Run();
   private:
     void ReadFile();
-    int Send();
+    void Send();
   private:
     StoreRequest mStore;
 	
 	std::string mFilename;
 	unsigned int mBytesInFile, mResponse;
-	char mStoreResponse[5];
+	char mStoreResponse[4];
 	char mFileBuffer[MAX];
 };
