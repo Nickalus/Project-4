@@ -1,3 +1,2 @@
-*Bug* When running occasionally the server doesn't complete the output. Usually when running mcput.
-*Bug* Server will not connect to host vis DNS when server and client are on same machine.
+When running occasionally the server doesn't complete the output. Usually when running mcput.
 

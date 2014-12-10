@@ -19,7 +19,7 @@ class BaseClient
     int mSocket; //Protected so it can be accessed by derived classes
   private:
     unsigned int mPort, mSecretKey;
-	char mAddy[128];
+	char mAddy[INET_ADDRSTRLEN];
 	
 	struct sockaddr_in mDest; 
 };

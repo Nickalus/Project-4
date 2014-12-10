@@ -13,27 +13,47 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
   //Clear struct
   memset(&mDest, 0, sizeof(mDest)); 
   
-char **pp; /* or dotted decimal IP addr */
-  struct in_addr addr;
-  struct hostent *hostp;
-  if(inet_aton(name.c_str(), &addr) != 0)
+  struct hostent *he;
+  struct in_addr **addr_list;
+  
+  switch(inet_pton(AF_INET, name.c_str(), &mDest)) 
   {
-    hostp = gethostbyaddr((const char *)&addr, sizeof(addr), AF_INET);
+    case -1:            //There was an error 
+      perror("IP error");
+	  exit(-1);
+    break;
+    case 0:            //Input isn't a valid IP address, must be a DNS
+      if((he = gethostbyname(name.c_str())) == NULL) 
+      {
+        // get the host info
+        herror("gethostbyname");
+        exit(1);
+      }
+    break;
+    case 1:            //Valid IP address
+      he = gethostbyaddr(&mDest, sizeof(mDest), AF_INET);
+	  
+	  if((he == NULL))
+      {
+        // get the host info
+        herror("gethostbyaddr");
+        exit(1);
+      }
+    break;
+    default:            // Note the colon, not a semicolon
+      //std::cout<<"Error, bad input, quitting\n";
+	  exit(1);
+    break;
   }
-  else
+  
+  addr_list = (struct in_addr **) he->h_addr_list;
+     
+  for(int i = 0; addr_list[i] != NULL; i++) 
   {
-    hostp = gethostbyname(name.c_str());
-  }
-
-  for (pp = hostp->h_addr_list; *pp != NULL; pp++) 
-  {
-    addr.s_addr = ((struct in_addr *)*pp)->s_addr;
-    //std::cout << "address: " << inet_ntoa(addr) << std::endl;
-	
-	//IP address of system
-	inet_pton(AF_INET, inet_ntoa(addr), &(mDest.sin_addr));
-	
-	break; //Only need first
+    std::cout << "Connecting..." << std::endl;
+    //Return the first one;
+    strcpy(mAddy , inet_ntoa(*addr_list[i]) );
+    break;
   }
 }
 
