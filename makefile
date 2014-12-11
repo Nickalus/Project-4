@@ -12,8 +12,8 @@ mcput : mcput.cpp StoreClient.cpp BaseClient.cpp
 mcget : mcget.cpp GetClient.cpp BaseClient.cpp
 	$(CXX) $(CXXFLAGS) -o mcget mcget.cpp GetClient.cpp BaseClient.cpp
 	 
-mcdel : mcdel.cpp DeleteClient.cpp BaseClient.cpp
-	$(CXX) $(CXXFLAGS) -o mcdel mcdel.cpp DeleteClient.cpp BaseClient.cpp
+mcdel : mcdel.cpp DelClient.cpp BaseClient.cpp
+	$(CXX) $(CXXFLAGS) -o mcdel mcdel.cpp DelClient.cpp BaseClient.cpp
 	 
 mclist : mclist.cpp ListClient.cpp BaseClient.cpp
 	$(CXX) $(CXXFLAGS) -o mclist mclist.cpp ListClient.cpp BaseClient.cpp
