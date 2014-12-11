@@ -50,7 +50,7 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
      
   for(int i = 0; addr_list[i] != NULL; i++) 
   {
-    std::cout << "Connecting..." << std::endl;
+    //std::cout << "Connecting..." << std::endl;
     //Return the first one;
     strcpy(mAddy , inet_ntoa(*addr_list[i]) );
     break;
@@ -60,7 +60,7 @@ BaseClient::BaseClient(std::string name, unsigned int port, unsigned int key)
 void BaseClient::Init()
 {
   //std::cout << "Connecting..." << std::endl;
-  
+   
   mDest.sin_family = AF_INET;
   
   //mDest.sin_addr.s_addr = inet_addr(mAddy);

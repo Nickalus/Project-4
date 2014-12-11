@@ -7,8 +7,6 @@ Files Included:
 	BaseClient.hpp
 	DelClient.cpp
 	DelClient.hpp
-	DeleteClient.cpp
-	DeleteClient.hpp
 	Documentation.txt
 	GetClient.cpp
 	GetClient.hpp
